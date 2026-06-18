@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1200" height="600" fill="#0d1117"/>
+  <text x="60" y="62" fill="#e6edf3" font-size="34" font-weight="700">BOM Squad — Roadmap</text>
+  <text x="60" y="92" fill="#8b949e" font-size="17">Same discipline throughout: facts in code, decisions with the human.</text>
+
+  <!-- timeline -->
+  <line x1="170" y1="150" x2="1030" y2="150" stroke="#30363d" stroke-width="3"/>
+  <circle cx="230" cy="150" r="9" fill="#3fb950"/>
+  <circle cx="600" cy="150" r="9" fill="#2f81f7"/>
+  <circle cx="970" cy="150" r="9" fill="#8b949e"/>
+  <text x="230" y="132" fill="#3fb950" font-size="18" font-weight="700" text-anchor="middle">SHIPPED</text>
+  <text x="600" y="132" fill="#2f81f7" font-size="18" font-weight="700" text-anchor="middle">NEXT</text>
+  <text x="970" y="132" fill="#8b949e" font-size="18" font-weight="700" text-anchor="middle">LATER</text>
+
+  <!-- card 1: shipped -->
+  <rect x="60" y="185" width="340" height="360" rx="12" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="84" y="225" fill="#3fb950" font-size="20" font-weight="700">Working today ✓</text>
+  <g fill="#cdd9e5" font-size="18">
+    <text x="84" y="262">▸ Plain-English intake</text>
+    <text x="84" y="296">▸ Live web sourcing (real parts)</text>
+    <text x="84" y="330">▸ 5-agent crew on Band</text>
+    <text x="84" y="364">▸ Landed cost: price + ship + duty</text>
+    <text x="84" y="398">▸ Budget re-optimizer</text>
+    <text x="84" y="432">▸ Human approval (you decide)</text>
+    <text x="84" y="466">▸ Saved order with buy links</text>
+  </g>
+
+  <!-- card 2: next -->
+  <rect x="440" y="185" width="340" height="360" rx="12" fill="#161b22" stroke="#2f81f7" stroke-width="1.5"/>
+  <text x="464" y="225" fill="#2f81f7" font-size="20" font-weight="700">Next</text>
+  <g fill="#cdd9e5" font-size="18">
+    <text x="464" y="262">▸ Multi-vendor bulk economics</text>
+    <text x="464" y="296">▸ Group by seller, bulk thresholds</text>
+    <text x="464" y="330">▸ Worldwide radius escalation</text>
+    <text x="464" y="364">▸ Real duty / customs estimates</text>
+    <text x="464" y="398">▸ Per-vendor shipping &amp; totals</text>
+  </g>
+
+  <!-- card 3: later -->
+  <rect x="820" y="185" width="340" height="360" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="844" y="225" fill="#8b949e" font-size="20" font-weight="700">Later</text>
+  <g fill="#cdd9e5" font-size="18">
+    <text x="844" y="262">▸ Checkout + in-app credits</text>
+    <text x="844" y="296">▸ Crew places the order</text>
+    <text x="844" y="330">▸ Order tracking &amp; fulfillment</text>
+    <text x="844" y="364">▸ Team / org procurement</text>
+  </g>
+
+  <!-- arrows -->
+  <text x="415" y="370" fill="#2f81f7" font-size="30" text-anchor="middle">→</text>
+  <text x="795" y="370" fill="#8b949e" font-size="30" text-anchor="middle">→</text>
+</svg>

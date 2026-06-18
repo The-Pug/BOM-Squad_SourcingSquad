@@ -1,0 +1,10 @@
+.env
+agent_config.yaml
+.claude/
+.cache/
+__pycache__/
+.venv/
+approved_order.md
+GUIDE.md
+CLAUDE.md
+cover.jpg

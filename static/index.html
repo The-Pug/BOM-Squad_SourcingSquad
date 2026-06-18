@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOM Squad</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3;
+    --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --red: #f85149; --row: #1c2128;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  .layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; padding: 20px 24px; align-items: start; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input, select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 7px 9px; font-size: 13px; }
+  .parts-head, .part-row { display: grid; grid-template-columns: 1.3fr 2fr 1fr 28px; gap: 8px; align-items: end; }
+  .parts-head { margin-bottom: 6px; }
+  .parts-head span { font-size: 12px; color: var(--muted); }
+  .part-row { margin-bottom: 8px; }
+  .x { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+    height: 32px; cursor: pointer; }
+  button { font-size: 13px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); }
+  .btn-ghost { background: var(--bg); color: var(--text); padding: 7px 12px; }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); padding: 9px 16px; font-weight: 600; }
+  .row-budget { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: end; margin-bottom: 16px; }
+  .actions { margin-top: 14px; display: flex; gap: 10px; }
+  .agent { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .agent:last-child { border-bottom: none; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); flex: none; }
+  .agent.active .dot { background: var(--accent); }
+  .agent.done .dot { background: var(--green); }
+  .agent .name { font-weight: 600; }
+  .agent .msg { color: var(--muted); font-size: 12px; }
+  #results { margin-top: 20px; }
+  .invoice { margin-bottom: 18px; }
+  .invoice .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .invoice .tag { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tr:nth-child(even) td { background: var(--row); }
+  .total { font-weight: 600; }
+  .ok { color: var(--green); } .bad { color: var(--red); }
+  .swaps { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+  a { color: var(--accent); text-decoration: none; }
+  .saved { color: var(--green); margin-top: 10px; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>BOM Squad</h1>
+  <p>List the parts and a budget — a crew of agents sources real parts, balances the cart, and you approve.</p>
+</header>
+
+<div class="layout">
+  <div>
+    <div class="panel">
+      <h2>New build</h2>
+      <div class="row-budget">
+        <div><label>Total budget (₹)</label><input id="budget" type="number" value="10000"></div>
+        <div class="muted" style="font-size:12px;">Add the parts the build needs. Min quality nudges the search.</div>
+      </div>
+      <div class="parts-head">
+        <span>Part</span><span>Specs</span><span>Min quality</span><span></span>
+      </div>
+      <div id="parts"></div>
+      <button class="btn-ghost" id="add">+ Add part</button>
+      <div class="actions">
+        <button class="btn-primary" id="run">Source the build</button>
+      </div>
+    </div>
+    <div id="results"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Crew</h2>
+    <div id="crew"></div>
+  </div>
+</div>
+
+<script>
+const AGENTS = ["Intake", "Sourcing", "Specialist", "Trust", "Budget"];
+const partsEl = document.getElementById("parts");
+const crewEl = document.getElementById("crew");
+const resultsEl = document.getElementById("results");
+
+function addPart(name = "", specs = "", quality = "balanced") {
+  const row = document.createElement("div");
+  row.className = "part-row";
+  row.innerHTML = `
+    <input class="p-name" placeholder="e.g. mainboard" value="${name}">
+    <input class="p-specs" placeholder="e.g. 32-bit, silent drivers" value="${specs}">
+    <select class="p-quality">
+      <option ${quality==="performance"?"selected":""}>performance</option>
+      <option ${quality==="balanced"?"selected":""}>balanced</option>
+      <option ${quality==="price"?"selected":""}>price</option>
+    </select>
+    <button class="x" title="remove">×</button>`;
+  row.querySelector(".x").onclick = () => row.remove();
+  partsEl.appendChild(row);
+}
+addPart();
+addPart();
+addPart();
+document.getElementById("add").onclick = () => addPart();
+
+function renderCrew(states) {
+  crewEl.innerHTML = AGENTS.map(a => {
+    const s = states[a] || {};
+    const cls = s.done ? "done" : (s.active ? "active" : "");
+    return `<div class="agent ${cls}"><div class="dot"></div>
+      <div><div class="name">${a}</div><div class="msg">${s.msg || ""}</div></div></div>`;
+  }).join("");
+}
+
+function money(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
+
+function invoice(cart, tag, choice) {
+  if (!cart) return "";
+  const rows = cart.rows.map(r => {
+    const fees = (r.shipping || 0) + (r.duty || 0);
+    const landed = r.unit * r.qty + fees;
+    const flag = r.imported ? ` <span class="muted">(${r.origin})</span>` : "";
+    return `
+    <tr>
+      <td>${r.category}<div class="muted">${r.product || ""}</div></td>
+      <td class="num">${money(r.unit)}${r.qty > 1 ? ` ×${r.qty}` : ""}</td>
+      <td class="num">${fees ? money(fees) + ' <span class="muted">est</span>' : "—"}</td>
+      <td class="muted">${r.delivery || "—"}</td>
+      <td class="num">${money(landed)}${flag}</td>
+      <td class="muted">${r.source && r.source !== "—" ? r.source : "—"}</td>
+    </tr>`;
+  }).join("");
+  const swaps = cart.swaps && cart.swaps.length
+    ? `<p class="swaps">Re-optimizer: ${cart.swaps.join("; ")}</p>` : "";
+  const cls = cart.over ? "bad" : "ok";
+  return `
+    <div class="invoice panel">
+      <div class="head"><span class="tag">${tag}</span>
+        <button class="btn-primary approve" data-choice="${choice}">Approve</button></div>
+      <table>
+        <thead><tr><th>Part</th><th class="num">Unit</th><th class="num">+Ship/Duty</th><th>Delivery</th><th class="num">Landed</th><th>Source</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr class="total"><td colspan="4">Landed total</td><td class="num">${money(cart.total)}</td>
+          <td class="${cls}">${cart.status}</td></tr></tfoot>
+      </table>
+      ${swaps}
+    </div>`;
+}
+
+function renderResult(result) {
+  if (!result) { resultsEl.innerHTML = `<p class="bad">Something went wrong — try again.</p>`; return; }
+  let html = "";
+  if (result.secondary) {
+    html += invoice(result.primary, "Primary — as sourced (best quality)", "primary");
+    html += invoice(result.secondary, "Secondary — re-optimized to fit budget", "secondary");
+    html += `<p class="muted">Your call: approve the premium cart (over budget) or the budget-fit one.</p>`;
+  } else {
+    html += invoice(result.primary, "Your bill", "primary");
+  }
+  if (result.bulk && result.bulk.length) {
+    html += `<div class="invoice panel"><div class="head"><span class="tag">Bulk savings available</span></div>`
+      + result.bulk.map(b => `<div style="padding:6px 0;border-bottom:1px solid var(--border)">${b.product}
+        <span class="muted"> — ${b.note}</span></div>`).join("")
+      + `</div>`;
+  }
+  html += `<p class="muted" style="font-size:12px">Shipping, duty and delivery are estimates; the totals are computed in code. The final purchase decision is yours.</p>`;
+  resultsEl.innerHTML = html;
+  document.querySelectorAll(".approve").forEach(b => b.onclick = () => approve(b.dataset.choice));
+}
+
+async function approve(choice) {
+  const r = await fetch("/approve", { method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ choice }) }).then(r => r.json());
+  if (!r.ok) return;
+  let html = `<p class="saved">✓ ${r.saved}</p>`;
+  if (r.links && r.links.length) {
+    html += `<div class="invoice panel"><div class="head"><span class="tag">Where to buy</span></div>`
+      + r.links.map(l => `<div style="padding:6px 0;border-bottom:1px solid var(--border)">${l.product || l.name}
+        <span class="muted"> — ${l.source}</span></div>`).join("")
+      + `</div>`;
+  }
+  resultsEl.innerHTML += html;
+}
+
+document.getElementById("run").onclick = () => {
+  const budget = parseInt(document.getElementById("budget").value, 10);
+  const parts = [...document.querySelectorAll(".part-row")].map(row => ({
+    name: row.querySelector(".p-name").value.trim(),
+    specs: row.querySelector(".p-specs").value.trim(),
+    quality: row.querySelector(".p-quality").value,
+  })).filter(p => p.name);
+  if (!parts.length) return;
+
+  resultsEl.innerHTML = "";
+  const states = {}; renderCrew(states);
+
+  fetch("/run", { method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ budget, parts }) });
+
+  const es = new EventSource("/stream");
+  es.onmessage = (e) => {
+    const ev = JSON.parse(e.data);
+    if (ev.type === "status") {
+      const i = AGENTS.indexOf(ev.agent);
+      AGENTS.forEach((a, j) => { if (j < i && states[a]) { states[a].done = true; states[a].active = false; } });
+      states[ev.agent] = { active: true, done: false, msg: ev.message };
+      renderCrew(states);
+    } else if (ev.type === "done") {
+      AGENTS.forEach(a => { if (states[a]) { states[a].active = false; states[a].done = true; } });
+      renderCrew(states);
+      renderResult(ev.result);
+      es.close();
+    }
+  };
+};
+</script>
+</body>
+</html>
