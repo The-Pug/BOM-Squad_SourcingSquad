@@ -1,4 +1,4 @@
-[[project]
+[project]
 name = "bom-squad-api"
 version = "0.1.0"
 dependencies = [
@@ -8,4 +8,4 @@ dependencies = [
     "pydantic==2.13.4",
     "langchain-google-genai==4.2.5",
     "band-sdk[langgraph]==1.0.0"
-]]
+]
