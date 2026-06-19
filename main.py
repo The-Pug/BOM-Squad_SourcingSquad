@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+from web import app
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
